@@ -25,8 +25,7 @@ You will need to work on databases, frontend and backend
 
  ## BONUS
 
- Refactor the application in a way that the database will be able to store a historic of the user info. Meaning that you can store your weight, calories and workout from different days.
+ - Refactor the application in a way that the database will be able to store a historic of the user info. Meaning that you can store your weight, calories and workout from different days.
  You will need to add a new table and create the relation between the user and that new table so whenever you query that data, everything will still be shown as expected **check how to add a foreign key to a table schema**
-
- Do a log out process
- Do a control error page
+ - Do a log out process
+ - Do a control error page
