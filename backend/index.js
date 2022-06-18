@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const app = express();
 const port = process.env.PORT || 5000;
 
+// middleware
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
@@ -20,6 +21,7 @@ connection.connect((err) => {
   console.log("Great! Your DB connection is working!")
 })
 
+// route to register a new user with data from frontend
 app.post("/register", (req, res) => {
   bcrypt.hash(req.body.password, 10)
   .then((hashedPassword) => {
@@ -39,6 +41,7 @@ app.post("/register", (req, res) => {
   .catch((hashError) => console.error(`There was an error encrypting the password: ${hashError}`))
 })
 
+// route to login, check if frontend-data corresponds to data in MySQL db
 app.post("/login", (req, res) => {
   const registerData = {
     username: req.body.email,
@@ -68,19 +71,48 @@ app.post("/login", (req, res) => {
   });
 });
 
-app.post("/update", (req, res) => {
-    let userData = {
-      date: req.date,
-      weight: req.weight,
-      calories: req.calories,
-      workout: req.workout
+// middleware to check if user has valid JWT
+const authenticateUser = (req, res, next) => {
+  const authHEader = req.headers.authorization;
+  /* this will be a string: Bearer [the actual token afterwards] 
+  if authHeader is true/exists -> go and split string into array: [0] = Bearer, we want [1] to get just the token itself */
+  const token = authHEader && authHEader.split(" ")[1]
+  if (token === undefined) return res.sendStatus(401);
+  // else: .verify(token you want to test, env.acces_token, callbackFn(err, user)) */
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    if(err) return res.sendStatus(403);
+    // else:
+    req.foundUser = user;
+    // built-in method that jumps to the next step after function call once the fn is done
+    next();
+  });
+}
+
+// path to get user data after checking with middleware if user has a valid token
+app.get("/dashboard", authenticateUser, (req, res) => {
+  connection.query(
+    // we have access to the new foundUser property that we added to req in the middleware
+    "SELECT username, date, weight, calories, workout FROM users WHERE username=?", 
+    req.foundUser.username,
+    (err, results) => {
+      if(err) {
+        res.sendStatus(500);
+      } else {
+        res.json(results[0]);
+      }
     }
-    connection.query("INSERT INTO users SET ? WHERE password = ?", userData, (err) => {
+  );
+})
+
+// route to update db with values submitted from dashboard page 
+app.put("/update", (req, res) => {
+    let {username, date, weight, calories, workout} = req.body;
+    connection.query("UPDATE users SET date=?, weight=?, calories=?, workout=? WHERE username=?", [date, weight, calories, workout, username], (err) => {
       if(err) {
         console.error(err);
         res.status(500).send("Error, could not update user data in the DB");
       } else {
-        res.status(201).json(userData);
+        res.sendStatus(201)
       }
     });
 })

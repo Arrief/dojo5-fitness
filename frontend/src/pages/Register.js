@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
+  const navigate = useNavigate();
+
   const [registerData, setRegisterData] = useState({
     email: "",
     password: ""
   });
 
-  const navigate = useNavigate();
-
+  // function to assign the input data to registerData object values
   const handleInfo = (event, category) => {
     setRegisterData({
       ...registerData,
@@ -16,6 +17,7 @@ const Register = () => {
     });
   }; 
 
+  // sending register data to the backend
   const handleRegister = (event) => {
     event.preventDefault();
     fetch("http://localhost:5000/register" , {
@@ -39,12 +41,15 @@ const Register = () => {
           email: "",
           password: ""
         })
+        // redirecting user to home, here = login
         navigate("/");
       } 
     });
   };
 
   return(
+    <>
+    <h3>Register</h3>
     <form onSubmit={handleRegister}>
       <input 
         type="email" 
@@ -62,6 +67,7 @@ const Register = () => {
       />
       <button>Submit</button>
     </form>
+    </>
   );
 }
 

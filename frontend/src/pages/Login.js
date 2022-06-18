@@ -9,6 +9,7 @@ const Login = () => {
     password: ""
   });
 
+  // function to assign the input data to loginData object values
   const handleInfo = (event, category) => {
     setLoginData({
       ...loginData,
@@ -16,6 +17,7 @@ const Login = () => {
     });
   }; 
 
+  // sending login data to the backend
   const handleLogin = (event) => {
     event.preventDefault();
     fetch("http://localhost:5000/login" , {
@@ -38,31 +40,34 @@ const Login = () => {
       return response.json()
     })
     .then((data) => {
-      localStorage.setItem("token", data.token)
-      const token = localStorage.getItem("token");
+      // placing jwt from backend in the local storage
+      localStorage.setItem("token", data.token);
       // redirect user to their profile
       navigate("/dashboard");
   });
   }
 
   return(
-    <form onSubmit={handleLogin}>
-      <input 
-        type="email" 
-        placeholder="email"
-        value={loginData.email}
-        onChange={(event) => handleInfo(event, "email")}
-        id="email"
-      />
-      <input 
-      type="password" 
-      placeholder="password" 
-      value={loginData.password}
-      onChange={(event) => handleInfo(event, "password")}
-      id="password"
-      />
-      <button>Submit</button>
-    </form>
+    <>
+      <h3>Login</h3>
+      <form onSubmit={handleLogin}>
+        <input 
+          type="email" 
+          placeholder="email"
+          value={loginData.email}
+          onChange={(event) => handleInfo(event, "email")}
+          id="email"
+        />
+        <input 
+        type="password" 
+        placeholder="password" 
+        value={loginData.password}
+        onChange={(event) => handleInfo(event, "password")}
+        id="password"
+        />
+        <button>Submit</button>
+      </form>
+    </>
   );
 }
 
